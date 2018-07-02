@@ -1,0 +1,42 @@
+（1）用省略号代替超出的部分，这个就是高度、宽度都受到限制的时候适用（是我比较喜欢的一种）
+
+text-overflow:clip 修剪文本|ellipsis 显示省略符号来代表被修剪的文本|string 使用给定的字符串来代表被修剪的文本。
+
+.content {
+        width: 80%;
+        height: 40px;
+        padding: 5px;
+        overflow: hidden; 多余的部分隐藏
+        white-space:nowrap; /*文本不换行*/--即单行
+        text-overflow: ellipsis;
+    }
+
+（2）超出部分换行，在单词过长，高度不受限制时适用
+
+word-break: normal 默认的|break-all 在单词内换行|keep-all 只能在半角空格或连字符处换行;
+
+p {
+    width: 160px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    word-break: break-all;---可以针对英文的长字段
+}
+
+（3）由于绝对定位或者其他情况，导致的标题盖住链接的，可以采用flex布局
+.word-secondli {
+        display: flex;
+        flex-wrap: wrap;/*换行，第一行在上*/
+        justify-content: space-between;/*两端对齐，项目间隔相等*/
+        align-items: center;/*居中对齐*/
+        border-bottom: 1px solid #ccc;
+    }
+
+<div class="word-secondli">
+    <h3>在网页开发中，经常会碰到在一些场景</h3>
+    <a href="#">click me</a>
+</div>
+
+
+
+关于第三种flex布局：https://www.cnblogs.com/xuyuntao/articles/6391728.html

@@ -1,0 +1,27 @@
+if基本的用法（两种）：
+
+1.常规
+
+if a>b:
+
+    c = a
+
+else:
+
+    c = b
+
+2.表达式
+
+c = a if a>b else b 
+
+
+for循环基本的用法（两种）：
+
+1.for i in range(1,11):
+	print(i)
+
+2.[x for x in 'absagasfjs' if x == 'a']  
+得出 x = ['a','a','a']
+
+
+func = lambda s,w: len( [ el for el in s if el == w])

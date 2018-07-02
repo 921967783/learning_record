@@ -1,0 +1,1 @@
+scp -r local_folder remote_username@remote_ip:remote_folder 

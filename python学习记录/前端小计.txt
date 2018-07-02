@@ -1,0 +1,52 @@
+函数（function）是可以执行的javascript代码块，由javascript程序定义或javascript实现预定义。函数可以带有实际参数或者形式参数，用于指定这个函数执行计算要使用的一个或多个值，而且还可以返回值，以表示计算的结果。
+
+方法（method）是通过对象调用的javascript函数。也就是说，方法也是函数，只是比较特殊的函数。假设有一个函数是fn，一个对象是obj，那么就可以定义一个method：
+
+
+{ }里面的是对象
+el:   元素
+data:{
+	name:"tao"
+	}	用于数据的存储
+
+html去获取data里的属性
+<h1> {{ name }} </h1>
+
+methods:用于存储各种方法
+事件：v-on 也可以用 @
+
+ol标签：表示有序列表
+li标签：定义列表项目   标签可用在有序列表 (<ol>) 和无序列表 (<ul>) 中。
+<b> (bold)粗体
+<big> 大字体
+<em> (emphasized)强调字
+<i> (italic)斜体
+<small> 小字体
+<strong> 加重语气
+
+: 是vue的缩写,v-bind的缩写
+
+
+
+$ 是 JQuery 常用的一个回传函数，定义为 "选取" 英文是 selector 的缩写
+例子︰
+$.function(); 
+就是 选取 JQuery 定义的 function() 执行
+$('input')
+就是 选取 HTML 当中全部的 input 标签
+$('#abc')
+就是 选取 HTML 当中 ID 名称为 abc 的物件
+$.fn.testing = function() {}
+就是 选取 JQuery 内核函数 fn (函数) 回传给 testing 这个名称、定义为一个功能 function()
+
+js的话声明变量用var  声明常量用const   （var对一个变量只能声明一次）
+
+var xiaomin={
+	name: '',
+	age: ''
+}
+js的对象属性的访问方式有两种： xiaomin.name 和xiaomin['name']
+
+
+二级域名、端口、协议必须与主页面完全相同，否则就算跨域
+ajax跨域请求后端处理

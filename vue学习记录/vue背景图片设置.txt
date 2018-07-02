@@ -1,0 +1,26 @@
+在Vue项目开发中我们经常要向页面中添加背景图片，可是当我们在样式中添加了背景图片后，编译打包后，配置到服务器上时，由于路径解析的问题，图片并不能够正确的显示出来，如下CSS样式：
+
+background:url("../../assets/head.jpg");
+
+这个时候我们就要考虑使用其他的方式了，node中提供了一种比较有效的方式来解决这个问题：
+
+1、在data中定义如下：
+
+ export default {
+ name: 'productdetailspage',
+ data() {
+  return {
+   note: {
+   backgroundImage: "url(" + require("../../assets/save.png") + ")",
+   backgroundRepeat: "no-repeat",
+   backgroundSize: "25px auto",
+   marginTop: "5px",
+   },
+  }
+ },
+
+2、通过行内样式将样式引入
+
+<div class="note" :style ="note"></div>
+
+就这样就能完美的解决这个问题了。

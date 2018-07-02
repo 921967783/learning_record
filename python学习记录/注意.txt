@@ -1,0 +1,14 @@
+访问字符串对象的属性length:
+
+stringObject.length; 返回该字符串的长度。
+
+var mystr="Hello World!";
+var myl=mystr.length;
+以上代码执行后，myl 的值将是：12
+
+访问字符串对象的方法：
+
+使用 String 对象的 toUpperCase() 方法来将字符串小写字母转换为大写：
+
+var mystr="Hello world!";
+var mynum=mystr.toUpperCase();

@@ -1,0 +1,34 @@
+import ....
+
+Vue.use(Router)
+
+export default new Router{(
+	rotes:{
+		[],
+		[],
+		[]
+		}
+)}
+
+
+上面的写法也可以写成：
+
+const router = new Router({
+			routes   -----接受里面包含rotes的对象作为参数
+)}
+
+const routes =[
+	{},
+	{}
+]	
+配置完成后，把router 实例注入到 vue 根实例中,就可以使用路由了？？？
+const app = new Vue({
+  router
+}).$mount('#app')
+
+照理说暴露出去就可以了
+export default router;
+
+
+也可以看：https://www.cnblogs.com/SamWeb/p/6610733.html
+包含动态路由，路由重定向

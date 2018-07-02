@@ -1,0 +1,21 @@
+安装node
+看npm配置
+使用淘宝镜像
+npm config set registry https://registry.npm.taobao.org
+
+然后不用npm管理用yarn
+cnpm install yarn -g
+yarn config get registry（看是不是淘宝镜像)
+yarn config set registry https://registry.npm.taobao.org（更新为淘宝镜像）
+yarn add newmodel
+
+npm install -g vue-cli
+
+创建webpack项目：
+vue init webpack project（不用选eslint）
+
+可以设置运行和编译同时进行，设置webpack项目的配置
+
+
+
+注意事项，貌似脚手架创建的项目webpack和相应配置会在node_modules的webpack里面相关导致删除整个node_modules再yarn之后项目无法运行。

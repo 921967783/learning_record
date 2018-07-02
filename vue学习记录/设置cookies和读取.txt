@@ -1,0 +1,50 @@
+cookie 是存储于用户的计算机中的变量。每当同一台计算机通过浏览器请求某个页面时，就会发送这个 cookie。可以使用 JavaScript或者jQuery 来创建和读取cookie 的值。 
+cookie 应用举例： 
+当用户首次访问页面时，页面或许会要求填写用户的用户名和密码。用户名和密码可以被存储于 cookie 中。当他们再次访问网站时，用户名和密码就会从 cookie 中取回，无需用户再去重新输入。
+
+使用JavaScript操作cookie
+
+创建和存储cookie:
+// 函数中的参数分别为 cookie 的名称、值以及过期天数
+function setCookie(c_name,value,expiredays){
+    var exdate=new Date();
+    exdate.setDate(exdate.getDate()+expiredays);
+    document.cookie=c_name+ "=" +escape(value)+
+    ((expiredays==null) ? "" : ";expires="+exdate.toGMTString())
+}
+setCookie('name','zzyn',1); // cookie过期时间为1天。
+
+// 如果要设置过期时间以秒为单位
+function setCookie(c_name,value,expireseconds){
+    var exdate=new Date();
+    exdate.setTime(exdate.getTime()+expireseconds * 1000);
+    document.cookie=c_name+ "=" +escape(value)+
+    ((expireseconds==null) ? "" : ";expires="+exdate.toGMTString())
+}
+setCookie('name','zzyn',3600);  //cookie过期时间为一个小时
+
+读取cookie值:
+// 函数中的参数为 要获取的cookie键的名称。
+function getCookie(c_name){
+    if (document.cookie.length>0){
+        c_start=document.cookie.indexOf(c_name + "=");
+        if (c_start!=-1){
+            c_start=c_start + c_name.length+1;
+            c_end=document.cookie.indexOf(";",c_start);
+            if (c_end==-1){ 
+                c_end=document.cookie.length;
+            }
+
+            return unescape(document.cookie.substring(c_start,c_end));
+        }
+     }
+
+    return "";
+}
+var uname= getCookie('name');
+console.log(uname);
+
+
+引用:  https://blog.csdn.net/ZaynahLy/article/details/75514988
+vue中cookie实际应用： http://www.bkjia.com/Javascript/1220389.html
+jquery的cookie操作:  https://www.cnblogs.com/zlq92/p/7804591.html

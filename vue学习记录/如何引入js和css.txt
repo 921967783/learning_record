@@ -1,0 +1,45 @@
+关于js：
+1.按需引入，不在main.js中引入，直接在有需要的vue组件中引入
+部分代码：
+<template></template>
+<script>
+import API from '../../assets/api/api.config.js'
+</script>
+这样引入的话，我们在当前组件可以直接使用API去找到这个js文件中的对象。
+如：API.edgeManager.deviceList
+
+2.全局引入，可以在main.js中引用并实例化对象
+部分js代码：
+const DEBUG = true;
+let BASE_URL = DEBUG ? 'url' : '';
+const API = {
+    //网关设备管理
+    'edgeManager':{
+        'deviceList':BASE_URL + '/devicemanager/device/list.do',//网关设备列表
+        'deviceDelete':BASE_URL + '/devicemanager/device/delete.do'//网关设备删除
+    }
+}
+export default API;
+
+在main.js中：
+
+import API from './assets/api/api.config.js'
+Vue.prototype.$API = API;
+
+这样，我们在vue组件中使用this.$API就可以找到这个js文件中的对象了。
+如：this.$API.edgeManager.deviceList
+
+
+
+关于css：
+ES6的引入方式：
+<template></template>
+<style scoped>
+ @import "../assets/common/common.css";
+</style>
+
+
+也可以在main.js中引入：
+import "../assets/common/common.css";
+然后在相应要用到该样式的vue文件中使用：
+。。。。。。------不知道还需不需要 @import "common.css"

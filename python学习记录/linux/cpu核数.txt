@@ -1,0 +1,24 @@
+aix
+AIX的硬件信息可以通过prtconf命令看到。
+1. 查看逻辑CPU个数
+#pmcycles -m
+2. 查看物理CPU个数
+#prtconf|grep Processors
+3. 确定CPU是几核
+用逻辑CPU除以物理CPU就是核数。
+4. 查看单个CPU的详细信息
+#lsattr -E -l proc0
+
+Linux操作系统
+Linux下的CPU信息全部都在/proc/cpuinfo这个文件中，可以直接打开看。
+1. 查看物理CPU的个数
+#cat /proc/cpuinfo |grep "physical id"|sort |uniq|wc -l
+ 
+2. 查看逻辑CPU的个数
+#cat /proc/cpuinfo |grep "processor"|wc -l
+ 
+3. 查看CPU是几核
+#cat /proc/cpuinfo |grep "cores"|uniq
+ 
+4. 查看CPU的主频
+#cat /proc/cpuinfo |grep MHz|uniq

@@ -1,0 +1,26 @@
+python3 
+
+一。搭建项目环境已经创建项目和app
+1.django-admin.py startproject my_blog  #创建项目，有两级目录
+2.django-admin.py startapp article      #创建项目的app
+3.在settings里面的INSTALLED_APPS下面添加app名字，使其与项目关联。
+4.初始化数据库生成数据文件 python manage.py makemigrations
+#生成数据库迁移脚本
+
+
+二。数据库设计（可以用自带的sqlite也可以用其他数据库如mysql，但要修改settings）
+1.编写models  （在自己创建的app里）
+blank = True 这个字段可以为空 null = True 如果有空的字段就会默认为null
+
+CharFiled是用来存储字符串的，还有类似存储时间的
+
+2.同步数据库（python manage.gy migrate app名）
+每次models有新加的都要进行数据库同步
+
+3.创建超级用户 （python manage.py createsuperuser )
+然后再admin.py里注册models
+
+4.view和urls
+requ 进来从服务器获取数据处理数据 然后用也没呈现
+
+三。模板语言 templats 和动态的url

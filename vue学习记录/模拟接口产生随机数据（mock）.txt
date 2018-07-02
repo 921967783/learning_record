@@ -1,0 +1,27 @@
+在vue中使用mock：
+
+在相应目录下创建js文件，以mock.js为例
+// 使用 Mock
+var Mock = require('mockjs')
+Mock.mock('http://localhost:3000',function(options) {
+    console.log(options);
+    return Mock.mock([
+
+      {username: 'admin', passwd: '123'},
+
+      {username: 'user', passwd: '321'},
+      {username: 'user', passwd: '321'},
+
+
+    ])
+  }
+)
+
+
+在main.js引入改js
+require('./mock')   ----路径看着改
+
+
+
+
+<a href="https://segmentfault.com/a/1190000010592626">引用自</a>
