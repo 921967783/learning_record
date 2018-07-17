@@ -1,0 +1,6 @@
+主要原因是两个标签display属性都是block
+
+例如：
+<div><ul><ul/><div/>这样div设定的宽高并不会对ul标签造成影响
+
+需要设置display：inline-block这样就会捕获ul标签

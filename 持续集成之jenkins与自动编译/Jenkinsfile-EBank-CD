@@ -1,0 +1,199 @@
+#!groovy
+// 定义变量
+// 后端模块
+deployModules = ["innermanage"]
+// 版本列表
+versions = [""]
+// 前端模块
+deployFrontModules = [ ]
+// 需要重启的服务
+needRestartServices = ["imsrv"]
+echo "Executed by 'null'"
+def deployMode="full";	//全量部署
+def group_id="com.nbcb";
+def artifact_id="ebank";
+def packaging="tar.gz";
+def svnUrl="http://12.99.110.85/svn/ebank/";
+def buildType='A';
+version="";
+selectedVersions="";
+def artifact_descrition="构建及部署innermange"
+class ArtifactInfo implements java.io.Serializable{ def name,groupId, artifactId, version, folder;	ArtifactInfo(n, gid, aid, v, f){ name=n; groupId=gid; artifactId=aid; version=v;folder=f; } }
+def artifacts=[];
+def tasks="EBank-362,EBank-960,EBank-1082,EBank-1115,EBank-116,EBank-168,EBank-1129,EBank-1133,EBank-1134,EBank-1178,EBank-1255,EBank-1289,EBank-1290,EBank-1393,EBank-1349,EBank-668,EBank-1629"
+
+
+timestamps {
+echo '执行下载ebank模块(企业)'
+node ( 'master' ) {
+	nodeName='master';
+	stage '下载ebank模块'
+		echo "Starts [UUID: e362425d-7820-4fee-be42-a460df044423, Node: master, Operation: 下载ebank模块 @ 34]"
+		for(def mdl in deployModules){
+		    echo "download artifact  ${mdl}..."
+			// stash artifact
+		    version = readFile("/.${artifact_id}_${mdl}_time.txt").trim()
+		    versions.add(version)
+		    sh "if [ -e ${artifact_id}-${mdl}-${version}.${packaging} ]; then rm -f ${artifact_id}-${mdl}-${version}.${packaging}; fi && python /opt/scripts/artifact_pull_push.py -g ${group_id} -a ${artifact_id}-${mdl} -v ${version} -p ${packaging}"
+		    stash includes: "${artifact_id}-${mdl}-${version}.${packaging}", name: "artifact_file_${mdl}"
+		}
+		echo "Ends [UUID: e362425d-7820-4fee-be42-a460df044423, Node: master, Operation: 下载ebank模块 @ 34]"
+}
+echo '执行部署innermanage'
+nodes = [ "102.181", "105.110", "101.13", "105.184", "105.185", "105.116", "105.119", "105.186", "105.187" ];
+for( nodeVar in nodes ) {
+	node ( nodeVar ) {
+	nodeName=nodeVar;
+		stage '部署ebank模块'
+			echo "Starts [UUID: e362425d-7820-4fee-be42-a460df044423, Node: ${nodeVar}, Operation: 部署ebank模块 @ 35]"
+			def stop_service = "true"
+			timeout(time: 300, unit: 'SECONDS') {
+			    waitUntil {
+			        try {
+			            // run stopService
+			            for (module_service in needRestartServices) {
+			                echo "run stop ${module_service} Service"
+			                if (module_service == "pbsrv") {
+			                    sh "process_id=\$(ps -ef |grep ${module_service} |grep /opt/IBM/ |awk '{print \$2}') && if [ \"\${process_id}\" != \"\" ]; then \$(cat /root/.bashrc |grep -E \"alias stoppb=\" |sed \"s/alias stoppb=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\"); fi"
+			                } else if (module_service == "cbsrv") {
+			                    sh "process_id=\$(ps -ef |grep ${module_service} |grep /opt/IBM/ |awk '{print \$2}') && if [ \"\${process_id}\" != \"\" ]; then \$(cat /root/.bashrc |grep -E \"alias stopcb=\" |sed \"s/alias stopcb=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\"); fi"
+			                } else if (module_service == "dcsrv") {
+			                    sh "process_id=\$(ps -ef |grep ${module_service} |grep /opt/IBM/ |awk '{print \$2}') && if [ \"\${process_id}\" != \"\" ]; then \$(cat /root/.bashrc |grep -E \"alias stopdc=\" |sed \"s/alias stopdc=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\"); fi"
+			                } else if (module_service == "imsrv") {
+			                    sh "process_id=\$(ps -ef |grep imsrv |grep /opt/IBM/ |awk '{print \$2}') && if [ \"\${process_id}\" != \"\" ]; then \$(cat /root/.bashrc |grep -E \"alias stopim=\" |sed \"s/alias stopim=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\"); fi"
+			                } else if (module_service == "doorbsrv") {
+			                    sh "process_id=\$(ps -ef |grep imsrv |grep /opt/IBM/ |awk '{print \$2}') && if [ \"\${process_id}\" != \"\" ]; then \$(cat /root/.bashrc |grep -E \"alias stopdoorb=\" |sed \"s/alias stopdoorb=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\"); fi"
+			                } else {
+			                    echo "${module_service} service doesnot exist!"
+			                }
+			                //sh "process_id=\$(ps -ef |grep imsrv |grep /opt/IBM/ |awk '{print \$2}') && if [ \"\${process_id}\" != \"\" ]; then \$(cat /root/.bashrc |grep -E \"alias stopim=\" |sed \"s/alias stopim=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\"); fi"
+			            }
+			            
+			            return true
+			        } catch(exception) {
+			        	stop_service = "false"
+			            // killall process
+			            echo "kill all java processes"
+			            sh "kill -9 \$(ps -ef |grep java |grep '/opt/IBM' |awk '{print \$2}')"
+						
+			            // startManager.sh
+			            echo "startManager.sh"
+			            sh "\$(cat /root/.bashrc |grep -E \"alias cddm=\" |sed \"s/alias cddm=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\") && ./startManager.sh"
+						
+			            // startNode.sh
+			            echo "startNode.sh"
+			            sh "\$(cat /root/.bashrc |grep -E \"alias cdwas=\" |sed \"s/alias cdwas=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\") && ./startNode.sh"
+			            
+			            return true
+			        }
+				}
+			}
+			def i=1
+			for(def mdl in deployModules){
+			    version=versions[i]
+			    i=i+1
+			    echo "Deploying ${artifact_id}-${mdl}-${version}.${packaging} ..."
+			    // copy files
+			    // svn_working_rootdir=mdl
+			    echo "Erase existing artifact '${artifact_id}-${mdl}-${version}.${packaging}' if existed"
+			    sh "if [ -e ${artifact_id}-${mdl}-${version}.${packaging} ]; then rm -f ${artifact_id}-${mdl}-${version}.${packaging}; fi"
+			    
+			    echo "download ${artifact_id}-${mdl}-${version}.${packaging} by 'artifact_file_${mdl}'"    
+			    unstash "artifact_file_${mdl}"
+			    
+			    deploy_dir = "/opt/IBM/WebSphere/installableApps/"
+			    if (mdl == "perbank") {
+			        deploy_dir = deploy_dir + "pbsrv"
+			    } else if (mdl == "corporbank") {
+			        deploy_dir = deploy_dir + "cbsrv"
+			    } else if (mdl == "dcbank") {
+			        deploy_dir = deploy_dir + "dcsrv"
+			    } else if (mdl == "innermanage") {
+			        deploy_dir = deploy_dir + "imsrv"
+			    } else if (mdl == "doorbank") {
+			        deploy_dir = deploy_dir + "doorbsrv"
+			    } else {
+			    	echo "${mdl} module doesnot exist!"
+			    }
+			    
+			    echo "Install module '${artifact_id}-${mdl}-${version}.${packaging}'"   
+			    //echo "innermanage_class_dir=/opt/IBM/WebSphere/installableApps/imsrv && if [ ! -d \${innermanage_class_dir} ]; then mkdir -p \${innermanage_class_dir}; fi && rm -rf \${innermanage_class_dir}/* && cp ${artifact_id}-${mdl}-${version}.${packaging} \${innermanage_class_dir} && cd \${innermanage_class_dir} && tar -xvf ${artifact_id}-${version}.${packaging} && rm -f \${innermanage_class_dir}/${artifact_id}-${version}.${packaging}"
+			    //sh "innermanage_class_dir=/opt/IBM/WebSphere/installableApps/imsrv && if [ ! -d \${innermanage_class_dir} ]; then mkdir -p \${innermanage_class_dir}; fi && rm -rf \${innermanage_class_dir}/* && cp ${artifact_id}-${mdl}-${version}.${packaging} \${innermanage_class_dir} && cd \${innermanage_class_dir} && tar -xvf ${artifact_id}-${mdl}-${version}.${packaging} && rm -f \${innermanage_class_dir}/${artifact_id}-${version}.${packaging}"
+			    echo "class_dir=${deploy_dir} && if [ ! -d \${class_dir} ]; then mkdir -p \${class_dir}; fi && rm -rf \${class_dir}/* && cp ${artifact_id}-${mdl}-${version}.${packaging} \${class_dir} && cd \${class_dir} && tar -xvf ${artifact_id}-${mdl}-${version}.${packaging} && rm -f \${class_dir}/${artifact_id}-${mdl}-${version}.${packaging}"
+			    sh "class_dir=${deploy_dir} && if [ ! -d \${class_dir} ]; then mkdir -p \${class_dir}; fi && rm -rf \${class_dir}/* && cp ${artifact_id}-${mdl}-${version}.${packaging} \${class_dir} && cd \${class_dir} && tar -xvf ${artifact_id}-${mdl}-${version}.${packaging} && if [ -e ${artifact_id}-${mdl}-${version}.${packaging} ]; then rm -f ${artifact_id}-${mdl}-${version}.${packaging}; fi && if [ -d \${class_dir}/WebContent ]; then cp -rf \${class_dir}/WebContent/* \${class_dir}; fi && if [ -d \${class_dir}/WebContent ]; then rm -rf \${class_dir}/WebContent; fi"
+				
+			    // del xml files
+			    if (mdl == "perbank") {
+			        sh "cd ${deploy_dir} && config_dir=WEB-INF/bizs/${mdl} && if [ -e \${config_dir}/services.xml ]; then rm -f \${config_dir}/services.xml; fi && if [ -e \${config_dir}/data.xml ]; then rm -f \${config_dir}/data.xml; fi && if [ -e \${config_dir}/contexts.xml ]; then rm -f \${config_dir}/contexts.xml; fi && if [ -e WEB-INF/mvcs/${mdl}/empServletContext.xml ]; then rm -f WEB-INF/mvcs/${mdl}/empServletContext.xml; fi && if [ -e WEB-INF/actionProfile.xml ]; then rm -f WEB-INF/actionProfile.xml; fi && if [ -e WEB-INF/mvcs/${mdl}/actions/financialProduct.xml ]; then rm -f WEB-INF/mvcs/${mdl}/actions/financialProduct.xml; fi"
+			    } else if (mdl == "corporbank") {
+			        sh "cd ${deploy_dir} && config_dir=WEB-INF/bizs/${mdl} && if [ -e \${config_dir}/services.xml ]; then rm -f \${config_dir}/services.xml; fi && if [ -e \${config_dir}/data.xml ]; then rm -f \${config_dir}/data.xml; fi && if [ -e \${config_dir}/contexts.xml ]; then rm -f \${config_dir}/contexts.xml; fi && if [ -e WEB-INF/mvcs/${mdl}/empServletContext.xml ]; then rm -f WEB-INF/mvcs/${mdl}/empServletContext.xml; fi && if [ -e WEB-INF/actionProfile.xml ]; then rm -f WEB-INF/actionProfile.xml; fi"
+			    } else if (mdl == "dcbank") {
+			         sh "cd ${deploy_dir} && config_dir=WEB-INF/bizs/DCBank && if [ -e \${config_dir}/services.xml ]; then rm -f \${config_dir}/services.xml; fi && if [ -e \${config_dir}/data.xml ]; then rm -f \${config_dir}/data.xml; fi && if [ -e \${config_dir}/contexts.xml ]; then rm -f \${config_dir}/contexts.xml; fi && if [ -e WEB-INF/mvcs/DCBank/empServletContext.xml ]; then rm -f WEB-INF/mvcs/DCBank/empServletContext.xml; fi && if [ -e WEB-INF/actionProfile.xml ]; then rm -f WEB-INF/actionProfile.xml; fi"
+			    } else if (mdl == "innermanage") {
+			        sh "cd ${deploy_dir} && config_dir=WEB-INF/bizs/${mdl} && if [ -e \${config_dir}/services.xml ]; then rm -f \${config_dir}/services.xml; fi && if [ -e \${config_dir}/data.xml ]; then rm -f \${config_dir}/data.xml; fi && if [ -e \${config_dir}/contexts.xml ]; then rm -f \${config_dir}/contexts.xml; fi && if [ -e WEB-INF/commons/srvConfig.xml ]; then rm -f WEB-INF/commons/srvConfig.xml; fi && if [ -e WEB-INF/mvcs/${mdl}/empServletContext.xml ]; then rm -f WEB-INF/mvcs/${mdl}/empServletContext.xml; fi && if [ -e WEB-INF/actionProfile.xml ]; then rm -f WEB-INF/actionProfile.xml; fi"
+			    } else if (mdl == "doorbank") {
+			         sh "cd ${deploy_dir} && config_dir=WEB-INF/bizs/${mdl} && if [ -e \${config_dir}/services.xml ]; then rm -f \${config_dir}/services.xml; fi && if [ -e \${config_dir}/data.xml ]; then rm -f \${config_dir}/data.xml; fi && if [ -e \${config_dir}/contexts.xml ]; then rm -f \${config_dir}/contexts.xml; fi && if [ -e WEB-INF/mvcs/${mdl}/empServletContext.xml ]; then rm -f WEB-INF/mvcs/${mdl}/empServletContext.xml; fi && if [ -e WEB-INF/actionProfile.xml ]; then rm -f WEB-INF/actionProfile.xml; fi"
+			    } else {
+			    	echo "No xml files to delete..."
+			    }
+			    
+			    
+			    // run upService
+			    for (module_service in needRestartServices) {
+			    	echo "run up ${module_service} Service"
+			        if (module_service == "pbsrv") {
+			            sh "\$(cat /root/.bashrc |grep -E \"alias uppb=\" |sed \"s/alias uppb=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			        } else if (module_service == "cbsrv") {
+			            sh "\$(cat /root/.bashrc |grep -E \"alias upcb=\" |sed \"s/alias upcb=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			        } else if (module_service == "dcsrv") {
+			            sh "\$(cat /root/.bashrc |grep -E \"alias updc=\" |sed \"s/alias updc=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			        } else if (module_service == "imsrv") {
+			            sh "\$(cat /root/.bashrc |grep -E \"alias upim=\" |sed \"s/alias upim=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			        } else if (module_service == "doorbsrv") {
+			            sh "\$(cat /root/.bashrc |grep -E \"alias updoorb=\" |sed \"s/alias updoorb=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			        } else {
+			        	echo "${module_service} service doesnot exist!"
+			        }
+			        //sh "\$(cat /root/.bashrc |grep -E \"alias upim=\" |sed \"s/alias upim=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			    }
+			    echo "Erasing ${artifact_id}-${mdl}-${version}.${packaging}"
+				sh "rm -f ${artifact_id}-${mdl}-${version}.${packaging}"
+			}
+			if (stop_service == "true") {
+			    echo "run startService"
+			    // run startService
+			    for (module_service in needRestartServices) {
+			        echo "run start ${module_service} Service"
+			        if (module_service == "pbsrv") {
+			            sh "\$(cat /root/.bashrc |grep -E \"alias startpb=\" |sed \"s/alias startpb=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			        } else if (module_service == "cbsrv") {
+			            sh "\$(cat /root/.bashrc |grep -E \"alias startcb=\" |sed \"s/alias startcb=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			        } else if (module_service == "dcsrv") {
+			            sh "\$(cat /root/.bashrc |grep -E \"alias startdc=\" |sed \"s/alias startdc=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			        } else if (module_service == "imsrv") {
+			            sh "\$(cat /root/.bashrc |grep -E \"alias startim=\" |sed \"s/alias startim=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			        } else if (module_service == "doorbsrv") {
+			            sh "\$(cat /root/.bashrc |grep -E \"alias startdoorb=\" |sed \"s/alias startdoorb=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			        } else {
+			            echo "${module_service} service doesnot exist!"
+			        }
+			        //sh "\$(cat /root/.bashrc |grep -E \"alias startim=\" |sed \"s/alias startim=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			    }
+			} else {
+				echo "stop some module service failed."
+			    // start innermanage
+			    sh "\$(cat /root/.bashrc |grep -E \"alias startim=\" |sed \"s/alias startim=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			    // start perbank
+			    sh "\$(cat /root/.bashrc |grep -E \"alias startpb=\" |sed \"s/alias startpb=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			    // start doorbank
+			    sh "\$(cat /root/.bashrc |grep -E \"alias startdoorb=\" |sed \"s/alias startdoorb=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			    // start dcbank
+			    sh "\$(cat /root/.bashrc |grep -E \"alias startdc=\" |sed \"s/alias startdc=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			    // start corporbank
+			    sh "\$(cat /root/.bashrc |grep -E \"alias startcb=\" |sed \"s/alias startcb=//\" |sed 's/\"//' |sed 's/\"//' |sed \"s/'//\" |sed \"s/'//\")"
+			}
+			echo "Ends [UUID: e362425d-7820-4fee-be42-a460df044423, Node: ${nodeVar}, Operation: 部署ebank模块 @ 35]"
+	}
+}
+
+}

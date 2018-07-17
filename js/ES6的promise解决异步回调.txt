@@ -1,0 +1,7 @@
+可以以ajax作例子
+（try catch不能捕捉异步请求的错误，借助promise .then .catch帮助捕捉）
+
+
+
+
+参考：https://www.cnblogs.com/whybxy/p/7645578.html

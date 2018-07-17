@@ -1,0 +1,73 @@
+sh "rsync -avzc --out-format='%n' \$(date +%Y%m%d)app/bankchannel/ /home/hsfss30/app/bankchannel.ear/bankchannel.war/|grep -v /\$ >> .rsync_file; fi" 
+
+#!groovy
+// 定义变量
+// 后端模块
+nodes = [""]
+group_id="com.nbcb"
+artifact_id="Jijin"
+package="tar.gz"
+version=""
+artifact_descrition="部署_UAT_JJDX"
+
+
+timestamps{
+echo "传变量"
+node ('105.203_win2008'){
+	nodeName="105.203_win2008";
+	stage ('重新传变量1'){
+
+		jijindate = readFile("C:/jijin.txt").trim()
+		}
+	}
+}
+
+echo '执行_下载_uat_JJDX'
+node ('master'){
+	nodeName = 'master';
+	stage('下载_uat_JJDX'){
+		def packaging = "zip"
+		def artifact_id = "Jijin"
+		echo "下载uat_JJDX"
+		version = readFile("/.{artifact_id}_uat_time.txt").trim()
+		sh "if [-e ${artifact_id}-uat-${version}.${packaging} ];then rm -f ${artifact_id}-uat-${version}.${packaging};fi &&........"
+		stash includes: "${artifact_id}-uat-${version}.${packaging}", name: "artifact_Jijin_file"
+	}
+}
+
+echo "执行部署_uat_JJDX(196197)"
+nodes = ["JJDX_113.196","JJDX_113.197"];
+for (nodeVar in nodes){
+	node (nodeVar) {
+		nodeName = nodeVar;
+		stage('执行部署_uat_JJDX(196197)'){
+			def packaging = "zip"
+			sh "is_exist_dir = \$(ls |wc -l) && if [ \${is_exist_dir} -ne 0 ]; then rm -rf *;fi"
+			unstash 'artifact_Jijin_file'
+			if (nodeName == "JJDX_113.196"){
+				sh "unzip *.${packaging}"
+				echo "开始停服务"
+				sh "....stopServer.sh server1"
+				sh "....stopServer.sh server1"
+				echo "停止服务OK"
+				
+				sh "if [ -d /home/hsfss30/install/${jijindate} ]; then rm -rf  /home/hsfss30/install/${jijindate}; fi"
+				sh "mv ${jijindate}/web/* ${jijindate}/ && cd ${jijindate} &&rm -rf app web"
+				sh "mv ${jijindate} /home/hsfss30/install"
+				sh "cd /home/hsfss30/install && chmod -R 775 ${jijindate}"
+				sh " . /etc/profile && cd /home/hsfss30 && . ~/.bash_profile && cd /home/hsfss30/install/${jijindate} && echo Y|./install_app.sh"
+				
+				
+				echo "开始启动服务"
+				sh "JENKINS_NODE_COOKIE=donKillMe nohup ./stopServer.sh server1 > console.log1 &"
+				sh "JENKINS_NODE_COOKIE=donKillMe nohup ./stopServer.sh server1 > console.log1 &"
+				echo "启动服务OK"
+				sh "curl -d \"filelist = `find /home/hsfss30/app -mtime -1|xargs|sed 's/ /,/g'`&groupID=${group_id}&artID=${artifact_id}-uat&version=${version}&nodecode=${NODE_NAME}\" http://12.99.110.36/receiveResult.action "
+			}
+			
+			if (nodeName == "JJDX_113.196"){
+				和上面差不多。。。。。。
+			}
+		}
+	}
+}

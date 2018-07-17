@@ -1,0 +1,50 @@
+#!groovy
+// 定义变量
+// 后端模块
+nodes = [""]
+group_id="com.nbcb"
+artifact_id="Jijin"
+package="tar.gz"
+version=""
+artifact_descrition="构建_UAT_JJDX"
+
+
+timestamps{
+echo "执行_检出_UAT_JJDX"
+node ('105.203_win2008'){
+	nodeName="105.203_win2008";
+	stage ('检出_uat_JJDX'){
+		stage '检出JJDX'
+		THISDAY="%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%"
+		repo_url = "http://12.99.110.83/svn/AUTO_DEPLOY/JJDX/UAT"
+		svn_working_dir = "UAT"
+		bat '''
+		if exist UAT/Jinjin_uat.zip(
+				del UAT\\Jijin_uat.zip /S /Q
+			)
+			'''
+		bat "cd D:/Work-Dir/workspace/pipeline-ESS-CI && C:/svn_checkout_md5.bat ${repo_url} ${svn_working_dir} ${uuid} ${group_id} $ {artifact_id}-uat"
+		bat "python C:/jijin.py"
+		jijindate = readFile("C:/jijin.txt").trim()
+		bat "cd UAT && C:/Progra~1/WinRAR/winrar.exe a Jinjin_uat.zip ${jijindate}"
+		stash includes: "UAT/Jijin_uat.zip", name: "Jinjin_uat_files"
+		requestBody = readFile("C:/Windows/file_diff/${artifact_id}-uat.txt").trim()
+		}
+	}
+}
+
+echo '执行_上传_uat_JJDX'
+node ('master'){
+	nodeName = 'master';
+	stage('上传_uat_JJDX'){
+		def packaging = "zip"
+		def artifact_id = "Jijin"
+		echo "上传uat_JJDX"
+		sh "rm -rf UAT"
+		unstash "Jinjin_uat_files"
+		sh "/opt/script/version.sh /.${artifact_id}_uat_time.txt"
+		version = readFile("/.{artifact_id}_uat_time.txt").trim()
+		sh "if [-e UAT/Jijin_uat.zip ];then mv UAT/Jijin_uat.zip /tmp/${artifact_id}-uat-${version}.${packaging};fi &&........"
+		echo "requestBody = ${requestBody}"
+	}
+}

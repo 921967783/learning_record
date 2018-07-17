@@ -1,0 +1,40 @@
+﻿最常用的就是构造函数与原型模式结合：
+例如—————
+function Person(name,age,job){
+	this.name = name;
+	this.age = age;
+	this.job = job;
+	this.friend = ['Shelby','Court];
+	
+}
+
+Person.prototype = {
+	constructor: Person,
+	sayName : function(){
+		alert(this.name);
+	}
+}
+var person1 =new Person('','','');-----创建了Person实例
+var person2 = new Person('','','');
+person1.friend.push('Van');
+不然两个函数的friend会共同变化
+这样就不会导致引用类型值共享的问题。
+
+ function Person() {
+
+      }
+      Person.prototype ={
+        name: 'ct',
+        age : 24
+      }
+      var person1 = new Person();
+      Person.prototype ={
+        len: 'ct',
+        to : 24
+      }
+      console.log(person1.len)
+      var person2 = new Person();
+      console.log(person2.age)
+	  
+输出两个undefined
+因为重写原型会导致创建的函数切断与原有原型的联系----->会新创建一个原型，而后面依据创建的函数会指向这个新原型。
