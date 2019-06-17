@@ -1,0 +1,34 @@
+redis集群
+加入集群，用redis-trib.rb 管理集群
+./redis-trib.rb create --replicas 1  ip:端口   这种方式是未每一个master配置一个slave，至少要3个master
+
+
+
+1，集群中的master的添加
+
+
+# redis-trib.rb add-node 192.168.10.219:6378 192.168.10.219:6379  
+注释：
+192.168.10.219:6378是新增的节点
+192.168.10.219:6379集群任一个旧节点
+
+然后再用
+# redis-trib.rb reshard 192.168.10.124:7005   重启分配hash槽点，关闭集群时为防止意外可以一个个关闭
+
+2，添加从节点
+# redis-trib.rb add-node --slave --master-id 03ccad2ba5dd1e062464bc7590400441fafb63f2 192.168.10.220:6385 192.168.10.219:6379  
+注释：
+--slave，表示添加的是从节点
+--master-id 03ccad2ba5dd1e062464bc7590400441fafb63f2,主节点的node id，在这里是前面新添加的6378的node id
+192.168.10.220:6385,新节点
+192.168.10.219:6379集群任一个旧节点
+
+
+
+3,删除主节点从节点
+从节点可以直接删除
+# redis-trib.rb del-node 192.168.10.124:7005 03ccad2ba5dd1e062464bc7590400441fafb63f2 
+
+主节点的删除要注意，如果有hash槽点分配的话不能直接删除，先把槽点分配给其他主，然后再删除
+
+# redis-trib.rb reshard 192.168.10.124:7005   重启分配hash槽点，关闭集群时为防止意外可以一个个关闭

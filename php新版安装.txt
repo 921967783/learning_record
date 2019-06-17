@@ -1,0 +1,21 @@
+默认的版本太低了，手动安装有一些麻烦，想采用Yum安装的可以使用下面的方案：
+
+1.检查当前安装的PHP包
+yum list installed | grep php
+如果有安装的PHP包，先删除他们
+ yum remove php.x86_64 php-cli.x86_64 php-common.x86_64 php-gd.x86_64 php-ldap.x86_64 php-mbstring.x86_64 php-mcrypt.x86_64 php-mysql.x86_64 php-pdo.x86_64
+2.Centos 5.X
+  rpm -Uvh http://mirror.webtatic.com/yum/el5/latest.rpm
+  CentOs 6.x
+  rpm -Uvh http://mirror.webtatic.com/yum/el6/latest.rpm
+  CentOs 7.X
+rpm -Uvh https://mirror.webtatic.com/yum/el7/epel-release.rpm
+rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+ 
+如果想删除上面安装的包，重新安装
+rpm -qa | grep webstatic
+rpm -e  上面搜索到的包即可
+
+
+3.运行yum install 安装php7.0
+yum install php70w-common php70w-fpm php70w-opcache php70w-gd php70w-mysqlnd php70w-mbstring php70w-pecl-redis php70w-pecl-memcached php70w-devel

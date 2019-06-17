@@ -1,0 +1,26 @@
+<?xml version="1.0" enconding="utf-8" ?>
+<project default="compile" basedir="." name="compile-to-bin">
+	<property name="workspace.dir" value=""/>
+	<property name="ant.xml.dir" value=""/>
+	<target name="compile">
+		<!--注意工程间的依赖关系，按顺序填写-->
+		<!--注意antfile是相对路径,以dir为基准路径的-->
+		
+		<!--0个项目依赖的-->
+		<ant antfile="${ant.xml.dir}/build.xml" target="compile" dir="${workspace.dir}/com/csii.prd.log"/>
+		...............
+		<ant antfile="${ant.xml.dir}/build.xml" target="compile" dir="${workspace.dir}/com/csii.prd.log"/>
+		<!--1个项目依赖的-->
+		<ant antfile="${ant.xml.dir}/build.xml" target="compile" dir="${workspace.dir}/com/csii.prd.log"/>
+		...............
+		<ant antfile="${ant.xml.dir}/build.xml" target="compile" dir="${workspace.dir}/com/csii.prd.log"/>
+		<!--2个项目依赖的-->
+		<ant antfile="${ant.xml.dir}/build.xml" target="compile" dir="${workspace.dir}/com/csii.prd.log"/>
+		...............
+		<ant antfile="${ant.xml.dir}/build.xml" target="compile" dir="${workspace.dir}/com/csii.prd.log"/>
+		<!--3个项目依赖的-->
+		<ant antfile="${ant.xml.dir}/build.xml" target="compile" dir="${workspace.dir}/com/csii.prd.log"/>
+		...............
+		<ant antfile="${ant.xml.dir}/build.xml" target="compile" dir="${workspace.dir}/com/csii.prd.log"/>
+	</target>
+</project>

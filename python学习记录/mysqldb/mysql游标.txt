@@ -1,0 +1,34 @@
+1、游标介绍
+MySQL的游标（cursor）是一个重要的概念，通过查找资料与自己的理解，主要得出以下几点关于自己的理解。
+
+有数据缓冲的思想：游标的设计是一种数据缓冲区的思想，用来存放SQL语句执行的结果。 先有数据基础：游标是在先从数据表中检索出数据之后才能继续灵活操作的技术。 类似于指针：游标类似于指向数据结构堆栈中的指针，用来pop出所指向的数据，并且只能每次取一个。
+
+
+drop procedure if exists cursor_test;
+delimiter //
+create procedure cursor_test()
+begin
+    -- 声明与列的类型相同的四个变量
+    declare id varchar(20); 
+    declare pname varchar(20); 
+    declare pprice varchar(20);
+    declare pdescription varchar(20);
+ 
+-- 1、定义一个游标mycursor
+    declare mycursor cursor for
+  select *from shops_info;
+-- 2、打开游标
+    open mycursor;
+-- 3、使用游标获取列的值
+    fetch  next from mycursor into id,pname,pprice,pdescription; 
+-- 4、显示结果
+    select id,pname,pprice,pdescription;
+-- 5、关闭游标
+    close mycursor;
+end;
+//
+delimiter ;
+call cursor_test();
+
+
+https://www.2cto.com/database/201712/703523.html

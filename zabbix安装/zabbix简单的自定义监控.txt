@@ -1,0 +1,43 @@
+说明：zabbix可以自定义创建模板，模板中包括了下面几项内容：
+
+###
+
+应用集：就是你想分几块进行监控（比如内存 CPU IO  网络等等）
+项目 ：项目是针对一个应用集来弄的（如果我要采集应用集 中 内存 的使用情况 你可以定义多个项目 比如总共内存 可用内存 空闲内存等等）
+触发器 ：触发器是针对一个项目来弄的（如果你采集可用内存的项目中 添加一个触发器当可以内存低于多少时 进行相应操作）
+图形 ：创建图形的数据来源都是 根据项目采集的数据来的 可以把一个或者多个项目 生成图形
+刷选 ：就是把生成的图片 这么放 排列等等
+
+###
+
+但如果正常模板无法满足要求，或者项目太多需要精简，那么就需要我们自建模板，自定义监控项来满足业务需求。
+
+以nginx为例，可以通过脚本来获取nginx的状态，shell，python都可以哪个方便就按自己的需求来：
+/usr/local/nginx/sbin/nginx status
+或者通过查找进程 ps-ef|grep nginx|grep master
+脚本：
+#!/bin/bash
+result=`ps -ef|grep nginx|grep master`
+if [ -n "$result" ]
+then
+ echo '1'
+else
+ echo '0'
+fi
+
+不需要定时任务，在zabbix_agentd设置（所以首先要在服务器安装zabbix_agentd)
+vi /etc/zabbix/zabbix_agentd.conf
+
+　　第一个：默认为0，此处我们将它改为1，改为1以后，表示用户自定义的脚本中可以包含特殊字符。
+
+　　第二个：为我们自定义监控项，格式为：UserParameter=<键值>,<命令>。这里我们自定义键值为：check_httpd，要执行的命令为执行check_httpd.sh这个脚本。
+
+　　说明：添加完成以后，重启zabbix_agentd才会生效。
+
+UnsafeUserParameters=1
+UserParameter=check_nginx,sh /tmp/zabbix_scripts/check_nginx.sh
+
+1.然后在zabbix客户端添加监控项
+2.根据自定义键值填写监控项，自定义的键值只能手动输入，不能通过选择
+3.添加成功后，在最新数据中查看是否获取到数据
+4.然后自己定义触发器来预警

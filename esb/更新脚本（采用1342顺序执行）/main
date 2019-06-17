@@ -1,0 +1,142 @@
+﻿#!/bin/sh
+MYDATE=`date +20%y年%m月%d日%H时%M分`
+cdate=`date "+%Y%m%d%H%M"`
+UpdateDir=`echo $HOME/SmartESB/bin/ESBupdate`
+THIS_HOST=`hostname -s`
+dispmenu () {
+clear
+echo "\033[03;15H                   宁 波 银 行  "
+echo "\033[04;15H                	ESB 更 新 工 具  "
+echo "\033[05;15H                               日期:$MYDATE"
+echo "\033[06;11H┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+echo "\033[07;11H┃                 一. 系统启停                             ┃"
+echo "\033[08;11H┃  1.关闭进程                                              ┃"
+echo "\033[09;11H┃  2.启动进程                                              ┃"
+echo "\033[10;11H┃                                                          ┃"
+echo "\033[11;11H┃                 二. 更新&备份                            ┃"
+echo "\033[12;11H┃  3.全量备份                                              ┃"
+echo "\033[13;11H┃  4.服务更新                                              ┃"
+echo "\033[14;11H┃                                                          ┃"
+echo "\033[15;11H┃                 三. 服务回退                             ┃"
+echo "\033[16;11H┃  5.全量回退                                              ┃"
+echo "\033[17;11H┃  6.单服务回退                                            ┃"
+echo "\033[18;11H┃                                                          ┃"
+echo "\033[19;11H┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
+echo "\033[20;28H请选择(0--退出): \c"
+}
+
+
+while [ 1 ]
+do
+MYDATE=`date +20%y年%m月%d日%H时%M分`
+   dispmenu
+   read ans
+
+      case $ans in
+
+         1)#关闭进程  
+            echo "\033[24;01H 请确认您是否要执行此操作(y/n)?"
+            read ans
+            if [ "$ans" = "y" ]
+            then
+              cd $UpdateDir
+               ./stopproc.sh
+               echo "\033[24;01H 按任意键继续......" 
+            else
+               echo "\033[24;01H 按任意键继续......"
+            fi
+
+            read ans
+
+            ;; 
+         2)#启动进程 
+	   echo "\033[24;01H 请确认您是否要执行此操作(y/n)?"
+           read ans
+           cd $UpdateDir
+           if [ "$ans" = "y" ]
+            then
+               ./startproc.sh
+               echo "\033[24;01H 按任意键继续......"
+            else
+               echo "\033[24;01H 按任意键继续......"
+            fi
+
+            read ans
+
+            ;;
+         3)#全量备份 
+            echo "\033[24;01H 请确认您是否要执行此操作(y/n)?"
+            read ans 
+            if [ "$ans" = "y" ]
+            then
+                cd $HOME
+                nowtime=`date "+%Y%m%d%H%M"`
+                echo "-----------------------------------------------" > esb_bak/bak.log
+                echo "$nowtime 备份SmartESB开始!!!!!" >> esb_bak/bak.log
+
+                tar -cvf SmartESB$cdate.tar SmartESB >> esb_bak/bak.log;
+                mv SmartESB$cdate.tar esb_bak/.;
+
+                nowtime=`date "+%Y%m%d%H%M"`
+                echo "$nowtime 备份SmartESB完成!!!!!" >> esb_bak/bak.log
+                echo "-----------------------------------------------" >> esb_bak/bak.log
+                echo "$nowtime 备份SmartMOM开始!!!!!" >> esb_bak/bak.log
+
+                tar -cvf SmartMOM$cdate.tar SmartMOM >> esb_bak/bak.log;
+                mv SmartMOM$cdate.tar esb_bak/.;
+ 
+                nowtime=`date "+%Y%m%d%H%M"`
+                echo "$nowtime 备份SmartMOM完成!!!!!">> esb_bak/bak.log
+                echo "备份SmartMOM完成!!!!!"
+                echo "-----------------------------------------------" >> esb_bak/bak.log
+                echo "\033[26;01H 按任意键继续......" 
+            else
+                echo "\033[26;01H 按任意键继续......"
+            fi
+            read ans
+            ;; 
+         4) #更新 
+            cd $UpdateDir
+            echo "\033[24;01H 请确认您是否要执行此操作(y/n)?"
+            read ans
+            if [ "$ans" = "y" ]
+            then
+	        ./upesb.sh 
+                echo "\033[24;01H 按任意键继续......"
+            else
+                echo "\033[24;01H 按任意键继续......"
+            fi
+
+            read ans
+            ;;
+         5)
+            ;;
+         6) echo "\033[24;01H 请确认您是否要执行此操作(y/n)?"
+            read ans
+            cd $UpdateDir
+            if [ "$ans" = "y" ]
+            then
+                ./backesb.sh 
+                echo "回退完成，现在重启进程(y/n)?"
+                read ans2
+                if [ $ans2 = y ]
+                then 
+                    chmod -R 755 /home/esb/SmartESB 
+                    chmod -R 755 /home/esb/SmartMOM 
+                    ./stopproc.sh 
+                    ./startproc.sh 
+                fi
+            else
+                echo "\033[24;01H 按任意键继续......"
+            fi
+
+            read ans
+            ;;
+       	 0) 
+        	clear
+		exit 0
+		;;
+         *) echo "\033[24;01H 无效的输入,按任意键继续......"
+            read ans;; 
+    esac
+done

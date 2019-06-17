@@ -1,0 +1,7 @@
+find  -name 'env.properties'|awk '{print $2}'
+cat ./zsaGov/zsaGov-web/src/main/resources/env.properties|grep  'zas.url'
+
+UPDATE user SET Password=PASSWORD('root') where USER='root';
+
+mysqldump -uroot -proot --databases mysql  > 
+cur_date="`date +%Y%m%d`"  

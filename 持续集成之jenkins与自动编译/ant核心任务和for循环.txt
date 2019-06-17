@@ -1,0 +1,15 @@
+
+.......
+	<property name="path.list" value="test1,test2,test3"/>
+	<target name="final.for" depends="init">
+		<for list="path.list" param="plugin">
+			<sequential>
+				<delete>
+					<filest dir="@{plugin}" includes="**/*.class"/>
+				</delete>
+			</sequential>
+		</for>
+	</target>
+
+
+ÒıÓÃ£ºhttps://blog.csdn.net/fanxiaobin577328725/article/details/53699735

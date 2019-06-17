@@ -1,0 +1,5 @@
+https://blog.csdn.net/sdx1237/article/details/79568312
+
+
+
+/sbin/sysctl -p

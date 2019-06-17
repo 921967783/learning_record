@@ -1,0 +1,5 @@
+paramiko的类封装
+https://www.cnblogs.com/python-nameless/p/6855804.html
+
+paramiko多线程实践
+http://www.cnblogs.com/bianjinhui/p/9801491.html

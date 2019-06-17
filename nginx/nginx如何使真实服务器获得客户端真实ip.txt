@@ -1,0 +1,18 @@
+tcp使用 stream模块  再配合nginx的stream  proxy_protocol怎么用
+https://blog.csdn.net/kikajack/article/details/79335991
+
+
+
+http的话
+1.   第一层代理将用户的真实 IP 放在 X-Real-IP 中传递下去，后面的每一层都使用 X-Real-IP 继续往下传递。配置为：
+
+  proxy_set_header X-Real-IP $remote_addr;     # 针对首层代理，拿到真实IP
+  proxy_set_header X-Real-IP $http_x_real_ip;  # 针对非首层代理，一直传下去
+
+https://blog.csdn.net/javaxiaobai001/article/details/79822103
+
+
+
+http或https传输协议代理
+前端nginx配置，后端nginx也要配置
+https://www.jb51.net/article/53821.htm

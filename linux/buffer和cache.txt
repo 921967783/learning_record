@@ -1,0 +1,72 @@
+ 首先，二者针对的对象不同，buffer叫缓冲，cache叫缓存。buffer是为了提高内存和硬盘或者其他I/O设备之间的数据交换速度而设计的；cache是为了提高CPU和内存之间的数据交换速度而设计的，缓存是分级的，比如一级缓存、二级缓存等。
+
+ CPU在执行程序所用的指令都要在内存中获取，但是内存的读写速度要比CPU慢得多，为了提高两者之间的交换速度，就在CPU和内存之间增加了cache。cache要比内存的速度快，这样就可以提高数据交换的速度，一般情况下cache是比较小的，因为CPU不能集成太多的集成电路。当然为了进一步的加快速度，陆陆续续又有了二级cache、三级cache...，通过此设计，CPU就减少了访问内存的次数，所以提高了速度。当然，如果cache中没有CPU想要的数据，CPU还是会到内存中去获取的。
+
+ buffer是把分散的写操作集中进行，减少磁盘碎片和硬盘的反复寻道，Linux系统中有一个守护进程定期将buffer中的内容统一写到磁盘，也可以通过sync命令手动进行。比如说：某个进程有多个字段的写入，在整个字段接收完之前，进程会先把这些字段统一放到buffer中。
+
+查看缓存
+free -m
+进一步的，使用slabtop可以发现cifs模块占用了大量的缓存
+slabtop
+
+临时清缓存和永久关闭缓存的方法：
+释放缓存区内存的方法
+1）清理pagecache（页面缓存）
+[root@backup ~]# echo 1 > /proc/sys/vm/drop_caches     或者 # sysctl -w vm.drop_caches=1
+ 
+2）清理dentries（目录缓存）和inodes
+[root@backup ~]# echo 2 > /proc/sys/vm/drop_caches     或者 # sysctl -w vm.drop_caches=2
+ 
+3）清理pagecache、dentries和inodes
+[root@backup ~]# echo 3 > /proc/sys/vm/drop_caches     或者 # sysctl -w vm.drop_caches=3
+　
+上面三种方式都是临时释放缓存的方法，要想永久释放缓存，需要在/etc/sysctl.conf文件中配置：vm.drop_caches=1/2/3，然后sysctl -p生效即可！
+ 
+另外，可以使用sync命令来清理文件系统缓存，还会清理僵尸(zombie)对象和它们占用的内存
+[root@backup ~]# sync
+ 
+ 
+温馨提示：
+上面操作在大多数情况下都不会对系统造成伤害，只会有助于释放不用的内存。
+但是如果在执行这些操作时正在写数据，那么实际上在数据到达磁盘之前就将它从文件缓存中清除掉了，这可能会造成很不好的影响。
+ 
+那么如果避免这种事情发生呢？
+因此，这里不得不提一下/proc/sys/vm/vfs_cache_pressure这个文件，告诉内核，当清理inoe/dentry缓存时应该用什么样的优先级。
+[root@backup ~]# cat /proc/sys/vm/vfs_cache_pressure
+100
+ 
+vfs_cache_pressure=100    这个是默认值，内核会尝试重新声明dentries和inodes，并采用一种相对于页面缓存和交换缓存比较"合理"的比例。
+ 
+减少vfs_cache_pressure的值，会导致内核倾向于保留dentry和inode缓存。
+增加vfs_cache_pressure的值，（即超过100时），则会导致内核倾向于重新声明dentries和inodes
+  
+总之，vfs_cache_pressure的值：
+小于100的值不会导致缓存的大量减少
+超过100的值则会告诉内核你希望以高优先级来清理缓存。
+  
+其实无论vfs_cache_pressure的值采用什么值，内核清理缓存的速度都是比较低的。
+如果将此值设置为10000，系统将会将缓存减少到一个合理的水平。
+======================================================
+ 
+这里顺便说下自己遇到的一个内存问题：
+IDC机房有一台专门的备份服务器，每天凌晨执行多个备份脚本。某天早上突然发现收到很多条zabbix监控报警信息：这台备份服务器的内存使用了已超过80%！
+于是，赶紧登陆这台备份服务器，使用free命令查看内存使用情况：
+[root@backup ~]# free -m
+             total       used       free     shared    buffers     cached
+Mem:         64181      48585      15596          3          2         18
+-/+ buffers/cache:      48564      15617
+Swap:        32767          0      3276
+ 
+确实发现内存使用率已超过80%！但是使用"top"命令查看，发现此时并没有什么进程在占用内存，并且本机是备份服务器，只有晚上执行备份脚本，
+其他时间都没有服务进程在跑！于是尝试手动释放内存：
+[root@backup ~]# echo 1 > /proc/sys/vm/drop_caches
+[root@backup ~]# echo 2 > /proc/sys/vm/drop_caches
+[root@backup ~]# echo 3 > /proc/sys/vm/drop_caches
+[root@backup ~]# sync
+ 
+发现在执行了上面第三条命令后，内存才真正被释放出来了，其他命令都没有起到效果。
+
+
+
+注意清理就先不清理inode了
+引用自：https://www.cnblogs.com/kevingrace/p/5991604.html

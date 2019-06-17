@@ -1,0 +1,69 @@
+1.2   让key接受参数
+通过让key也接受参数的方法使item添加时更具备了灵活性，例如系统预定义key ：vm.memory.size[<mode>]，其中的mode模式就是用户要接受的参数，当我们填写为free时则返回的为内存的剩余大小，如果我们填入的为userd时这返回的是内存已经使用的大小。
+相关语法
+UserParameter=key[*],command
+Parameter
+描述
+Key
+Key的值在主机系统中必须是唯一的，其中*代表命令中接受的参数
+命令
+ 
+例1：
+UserParameter=ping[*],echo $1
+ping[0] - will always return '0'
+ping[aaa] - will always return 'aaa'
+
+1.3举例：通过用户参数测试网站的连通性。
+1.3.1     环境介绍
+计算机名
+Ip
+角色
+Zabbixserver.solutionware.com.cn
+192.168.200.148
+服务器端
+vm1-solutionware.com.cn
+192.168.200.151
+监控端
+ 
+ 
+1.3.2     为代理端添加用户参数
+在代理端vm1-solutionware.com.cn的zabbix_agentd.conf配置文件中添加
+UserParameter=http_request[*],/usr/bin/curl -o /dev/null -s -w %{http_code} $1
+ 
+添加完成后重启代理端服务。
+Service zabbix_agentd   restart
+
+
+
+
+
+Name：动作名称
+Default subject：邮件主题
+Default message：邮件内容
+Recovery message：勾选恢复通知信息
+Recovery subject：恢复主题
+Recovery message：恢复内容
+Enabled：启动
+Default subject：Zabbix 监控告警 : {TRIGGER.NAME}！
+Default message：
+    告警信息：{TRIGGER.NAME}
+    告警主机：{HOSTNAME1}
+    告警时间：{EVENT.DATE} {EVENT.TIME}
+    告警等级：{TRIGGER.SEVERITY}
+    告警项目：{TRIGGER.KEY1}
+    问题详情：{ITEM.NAME}:{ITEM.VALUE}
+    当前状态：{TRIGGER.STATUS}:{ITEM.VALUE1}
+    事件ID：{EVENT.ID}
+    From：Zabbix.guoxh.cn
+
+Recovery subject：Zabbix 监控恢复 : {TRIGGER.NAME} ！!
+Recovery message：
+    告警信息：{TRIGGER.NAME}
+    告警主机：{HOSTNAME1}
+    告警时间：{EVENT.DATE} {EVENT.TIME}
+    告警等级：{TRIGGER.SEVERITY}
+    告警项目：{TRIGGER.KEY1}
+    问题详情：{ITEM.NAME}:{ITEM.VALUE}
+    当前状态：{TRIGGER.STATUS}:{ITEM.VALUE1}
+    事件ID：{EVENT.ID}
+    From：Zabbix.guoxh.cn

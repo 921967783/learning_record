@@ -1,0 +1,56 @@
+input {
+    file {
+            path => "/usr/local/tomcat8081/logs/catalina.out"
+            type => "116tomcat8081"
+    }
+
+    file {
+            path => "/usr/local/tomcat8082/logs/catalina.out"
+            type => "116tomcat8082"
+    }
+
+    file {
+            path => "/usr/local/tomcat8122/logs/catalina.out"
+            type => "116tomcat8122"
+    }
+}
+
+
+output {
+    if [type] == "116tomcat8081" {
+		elasticsearch {
+			hosts => ["47.98.210.22:10000"]
+			action => "index"
+			index  => "116_zsatomcat8081"
+			#index  => "118_tomcat8101_企业端-%{+YYYY.MM.dd}"
+		}
+		stdout {
+			codec => rubydebug
+		}
+    }
+
+    if [type] == "116tomcat8082" {
+		elasticsearch {
+			hosts => ["47.98.210.22:10000"]
+			action => "index"
+			index  => "116_zsatomcat8082"
+			#index  => "118_tomcat8102_监管端-%{+YYYY.MM.dd}"
+		}
+		stdout {
+			codec => rubydebug
+		}
+    }
+
+    if [type] == "116tomcat8122" {
+		elasticsearch {
+			hosts => ["47.98.210.22:10000"]
+			action => "index"
+			index  => "116_zsatomcat8122"
+			#index  => "118_tomcat8103_运营端-%{+YYYY.MM.dd}"
+		}
+		stdout {
+			codec => rubydebug
+		}
+    }
+
+} 

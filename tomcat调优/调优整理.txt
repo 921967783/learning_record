@@ -1,0 +1,97 @@
+tomcat8.0 基本参数调优配置
+https://www.cnblogs.com/hukey/p/5517314.html
+
+
+1.配置jvm参数，在bin/catalina.sh上配置
+类似        JAVA_OPTS="-Xms2g -Xmx2g -Xmn256m -Xss256k -XX:PermSize=256M -XX:MaxPermSize=256m"
+
+-Xms：初始化内存
+-Xmx：最大内存
+这两个设成一致最好，防止内存波动造成影响
+-XX:PermSize：设置持久代内存大小
+-XX:MaxPermSize：设置最大值持久代内存大小，永久代不属于堆内存，堆内存只包含新生代和老年代。
+-Xss：表示每个 Java 线程堆栈大小，JDK 5.0 以后每个线程堆栈大小为 1M，以前每个线程堆栈大小为 256K。根据应用的线程所需内存大小进行调整，在相同物理内存下，减小这个值能生成更多的线程，但是操作系统对一个进程内的线程数还是有限制的，不能无限生成，经验值在 3000~5000 左右。一般小的应用， 如果栈不是很深， 应该是128k 够用的，大的应用建议使用 256k 或 512K，一般不易设置超过 1M，要不然容易出现out ofmemory。这个选项对性能影响比较大，需要严格的测试。
+-Xmn：新生代的内存空间大小，注意：此处的大小是（eden+ 2 survivor space)。与 jmap -heap 中显示的 New gen 是不同的。整个堆大小 = 新生代大小 + 老生代大小 + 永久代大小。在保证堆大小不变的情况下，增大新生代后，将会减小老生代大小。此值对系统性能影响较大，Sun官方推荐配置为整个堆的 3/8。
+
+2.maxThreads 连接数限制修改配置
+默认值:
+
+<!--
+ <Executor name="tomcatThreadPool" namePrefix="catalina-exec-"
+ maxThreads="150" minSpareThreads="4"/>
+ -->
+
+修改为:
+
+<Executor
+ name="tomcatThreadPool"
+ namePrefix="catalina-exec-"
+ maxThreads="500"
+ minSpareThreads="30"
+ maxIdleTime="60000"
+ prestartminSpareThreads = "true"
+ maxQueueSize = "100"
+/>
+maxThreads：最大线程数
+minSpareThreads：初始化线程
+maxIdleTime：如果当前线程大于初始化线程，那空闲线程存活的时间，单位毫秒，默认60000=60秒=1分钟
+prestartminSpareThreads：在 Tomcat 初始化的时候就初始化 minSpareThreads 的参数值，如果不等于 true，minSpareThreads 的值就没啥效果了
+maxQueueSize：最大的等待队列数，超过则拒绝请求
+accepCount（最大等待数）：当调用Web服务的HTTP请求数达到tomcat的最大线程数时，还有新的HTTP请求到来，这时tomcat会将该请求放在等待队列中，这个acceptCount就是指能够接受的最大等待数，默认100.如果等待队列也被放满了，这个时候再来新的请求就会被tomcat拒绝（connection refused）。
+maxConnections（最大连接数）：这个参数是指在同一时间，tomcat能够接受的最大连接数。一般这个值要大于maxThreads+acceptCount。
+
+
+3.Connector 参数优化配置
+
+默认值:
+
+<Connector 
+ port="8080" 
+ protocol="HTTP/1.1" 
+ connectionTimeout="20000" 
+ redirectPort="8443" 
+ />
+修改为:
+<Connector
+ executor="tomcatThreadPool"
+ port="8080"
+ protocol="org.apache.coyote.http11.Http11Nio2Protocol"
+ connectionTimeout="60000"
+ maxConnections="10000"
+ redirectPort="8443"
+ enableLookups="false"
+ acceptCount="100"
+ maxPostSize="10485760"
+ maxHttpHeaderSize="8192"
+ compression="on"
+ disableUploadTimeout="true"
+ compressionMinSize="2048"
+ acceptorThreadCount="2"
+ compressableMimeType="text/html,text/plain,text/css,application/javascript,application/json,application/x-font-ttf,application/x-font-otf,image/svg+xml,image/jpeg,image/png,image/gif,audio/mpeg,video/mp4"
+ URIEncoding="utf-8"
+ processorCache="20000"
+ tcpNoDelay="true"
+ connectionLinger="5"
+ server="Server Version 11.0"
+ />
+参数解释：
+
+protocol：Tomcat 8 设置 nio2 更好：org.apache.coyote.http11.Http11Nio2Protocol
+protocol：Tomcat 6 设置 nio 更好：org.apache.coyote.http11.Http11NioProtocol
+protocol：Tomcat 8 设置 APR 性能飞快：org.apache.coyote.http11.Http11AprProtocol 更多详情：《Tomcat 8.5 基于 Apache Portable Runtime（APR）库性能优化》
+connectionTimeout：Connector接受一个连接后等待的时间(milliseconds)，默认值是60000。
+maxConnections：这个值表示最多可以有多少个socket连接到tomcat上
+enableLookups：禁用DNS查询
+acceptCount：当tomcat起动的线程数达到最大时，接受排队的请求个数，默认值为100。
+maxPostSize：设置由容器解析的URL参数的最大长度，-1(小于0)为禁用这个属性，默认为2097152(2M) 请注意， FailedRequestFilter 过滤器可以用来拒绝达到了极限值的请求。
+maxHttpHeaderSize：http请求头信息的最大程度，超过此长度的部分不予处理。一般8K。
+compression：是否启用GZIP压缩 on为启用（文本数据压缩） off为不启用， force 压缩所有数据
+disableUploadTimeout：这个标志允许servlet容器使用一个不同的,通常长在数据上传连接超时。 如果不指定,这个属性被设置为true,表示禁用该时间超时。
+compressionMinSize：当超过最小数据大小才进行压缩
+acceptorThreadCount：用于接受连接的线程数量。增加这个值在多CPU的机器上,尽管你永远不会真正需要超过2。 也有很多非维持连接,您可能希望增加这个值。默认值是1。
+compressableMimeType：配置想压缩的数据类型
+URIEncoding：网站一般采用UTF-8作为默认编码。
+processorCache：协议处理器缓存的处理器对象来提高性能。 该设置决定多少这些对象的缓存。-1意味着无限的,默认是200。 如果不使用Servlet 3.0异步处理,默认是使用一样的maxThreads设置。 如果使用Servlet 3.0异步处理,默认是使用大maxThreads和预期的并发请求的最大数量(同步和异步)。
+tcpNoDelay：如果设置为true,TCP_NO_DELAY选项将被设置在服务器套接字,而在大多数情况下提高性能。这是默认设置为true。
+connectionLinger：秒数在这个连接器将持续使用的套接字时关闭。默认值是 -1,禁用socket 延迟时间。
+server：隐藏Tomcat版本信息，首先隐藏HTTP头中的版本信息

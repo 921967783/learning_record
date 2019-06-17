@@ -1,0 +1,38 @@
+<?xml version="1.0" enconding="utf-8" standalone="no" ?>
+<project default="build" basedir="." name="build project">
+	<property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+	<property envirmont="env"/>
+	<property name="target" value=""/>
+	<property name="source" value=""/>
+	<property name="encoding" value=""/>
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="../ant/ant-contrib/ant-contrib-1.0b3.jar"/>
+		</classpath>
+	</taskdef>
+	<path id ="pro.classpath">
+		<fileset dir="../" inculdes="**/*.jar">
+			<exclude name="com.csii.pe.dynamic.runtime/**/bundles4/*.jar"/>
+		</fileset>
+		<pathelement path="../**/bin"/>
+		....................
+		<pathelement path="../com.csii.pe.dynamic.runtime/bin"/>
+	</path>
+	<target name="init">
+		<delete dir="bin"/>
+		<delete dir="build"/>
+		<mkdir dir="bin"/>
+		<copy todir="bin">
+			<fileset dir="src">
+				<exclude name="**/*.jar"/>
+			</fileset>
+		</copy>
+	</target>
+	<target depends="init" name="compile">
+		<javac debug="true" destdir="bin" source="${source}" target="${target}" includeantruntime="false" encoding="${encoding}" nowarn="true">
+			<src path="src"/>
+			<compilerarg line="-preserceAllLocals"/>
+			<classpath refild="pro.classpath"/>
+		</javac>
+	</target>
+</project>

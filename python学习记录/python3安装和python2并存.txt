@@ -1,0 +1,18 @@
+下载包
+wget https://www.python.org/ftp/python/3.6.0/Python-3.6.0.tgz
+
+安装依赖
+yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc make -y
+
+解压
+tar zxvf Python-3.6.0.tgz
+配置安装信息
+./configure --prefix=/usr/local/python3/
+编译
+make && make install
+
+安装完毕，/usr/local/目录下就会有python3了
+
+因此我们可以添加软链到执行目录下/usr/bin
+
+ln -s /usr/local/python3/bin/python3.6 /usr/bin/python3

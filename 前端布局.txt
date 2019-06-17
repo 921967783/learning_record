@@ -1,0 +1,8 @@
+1.div、span、position、float，借助元素元素盒模型本身的特性以及 float position 等属性等进行布局.
+
+2.flex弹性盒子 ，革命性的突破，解决传统布局方案上的三大痛点 排列方向、对齐方式，自适应尺寸。是目前最为成熟和强大的布局方案。
+
+3.bootstrap中的栅格布局，如果你是初次接触Bootstrap，你一定会为它的栅格布局感到敬佩。事实上，这个布局系统提供了一套响应式的布局解决方案。
+
+
+flex弹性盒子：https://www.cnblogs.com/cswzl/p/7710668.html

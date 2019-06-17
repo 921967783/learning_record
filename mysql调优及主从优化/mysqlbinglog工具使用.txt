@@ -1,0 +1,13 @@
+https://www.cnblogs.com/xhyan/p/6530861.html
+
+方法1（整个转译）：
+找到对应binglog二进制文件   例如：mysqld-relay-bin.000088
+/usr/local/mysql/bin/mysqlbinlog -v --base64-output=decode-rows mysqld-relay-bin.000088 >1.sql
+
+方法2（按照position节点查询）：
+/usr/local/mysql/bin/mysqlbinlog -v mysqld-relay-bin.000088 --start-position=100  --stop-position=200
+
+方法3（按照时间节点查询）：
+/usr/local/mysql/bin/mysqlbinlog --start-datetime='2019-03-26 17:32:30' -v --stop-datetime='2019-03-26 17:36:10' -d bfhunt mysqld-relay-bin.000088
+
+基本就用1和3吧

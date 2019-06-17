@@ -1,0 +1,47 @@
+https://blog.csdn.net/zstack_org/article/details/64438677
+进程管理python模块
+直接yum下载
+supervisor
+https://www.cnblogs.com/zhoujinyi/p/6073705.html
+启动级别，系统自启动和崩溃重启
+
+一.、在/etc/rc.local文件中添加自启动命令
+执行命令： 编辑"/etc/rc.local"，添加你想开机运行的命令
+
+运行程序脚本：然后在文件最后一行添加要执行程序的全路径。
+
+不过我们首先需要为 /etc/rc.local 添加执行权限，
+
+$ sudo chmod +x /etc/rc.local
+
+例如，每次开机时要执行一个hello.sh，这个脚本放在/usr下面，那就可以在"/etc/rc.local"中加一行"/usr/./hello.sh"，或者" cd /opt && ./hello.sh "
+
+注意，你的命令应该添加在：exit 0 之前
+
+
+二. 运行级别设置
+
+三. 把脚本注册为系统服务
+在/etc/init.d下新建示例脚本文件（startTest.sh），该脚本会启动/opt/test.sh。内容如下：
+
+. /etc/init.d/functions
+start() {
+echo "Starting my process "
+cd /opt
+./test.sh
+}
+stop() {
+killall test.sh
+echo "Stoped"
+}
+写了脚本文件之后事情还没有完，继续完成以下几个步骤：
+
+chmod +x startTest　　　　　　　　 #增加执行权限
+chkconfig --add startTest 　　　 #把startTest添加到系统服务列表
+chkconfig startTest on 　　　　　 #设定startTest的开关（on/off）
+chkconfig --list startTest.sh   #就可以看到已经注册了startTest的服务
+
+四.取巧的方式，设置定时任务检查服务是否启动，如果启动就pass，如果没启动就启动，设置逻辑，联系几次启动失败则通知不继续重启。
+
+
+链接：tomcat设为开机自启动的方式：https://www.cnblogs.com/kinyer/p/5699809.html

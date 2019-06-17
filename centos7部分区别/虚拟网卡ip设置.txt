@@ -1,0 +1,19 @@
+1.网卡命名的规则被重新定义，先去除默认设置
+vi /etc/sysconfig/grub  #编辑
+
+在”GRUB_CMDLINE_LINUX“变量中添加一句"net.ifnames=0 biosdevname=0"
+
+2.
+运行命令：grub2-mkconfig -o /boot/grub2/grub.cfg  #重新生成grub配置并更新内核参数
+
+3.添加udev的规则
+在”/etc/udev/rules.d“目录中创建一个网卡规则”70-persistent-net.rules“,并写入下面的语句:
+
+SUBSYSTEM=="net",ACTION=="add",DRIVERS=="?*",ATTR{address}=="00:0c:29:dc:dd:ad",ATTR｛type｝=="1" ,KERNEL=="eth*",NAME="eth0"
+(置空试试也应该可以，但需要重启）
+
+4.修改网卡配置
+cd /etc/sysconfig/network-scripts/
+mv ifcfg-ens192 ifcfg-eth0
+mv ifcfg-ens192 ifcfg-eth1
+(修改前先备份下）

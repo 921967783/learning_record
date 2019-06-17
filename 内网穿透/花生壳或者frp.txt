@@ -1,0 +1,10 @@
+https://diannaobos.com/frp/
+https://www.jianshu.com/p/e8e26bcc6fe6
+
+frp配置详解：http://www.chuantou.org/47.html
+https://github.com/fatedier/frp/blob/master/conf/frps_full.ini
+
+
+
+frp设置开机自启动和守护进程防止服务器重启和服务崩溃引起的服务中断
+https://blog.csdn.net/Geek_of_CSDN/article/details/80399627

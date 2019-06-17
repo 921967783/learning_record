@@ -1,0 +1,12 @@
+find ./ -name '*201901*' -type f|sed 's/\(.*\)\(201901\)\(.*\)/mv \1\2\3 \1201902\3/'|sh
+
+
+find ./ -name '*201902*' -type f|xargs sed -i 's/20191/20192/g'
+
+
+
+
+
+
+find ./ -name '*201812*' -type f|sed 's/\(.*\)\(201901\)\(.*\)/mv \1\2\3 \120191\3/'|sh
+find ./ -name '*201901*' -type f|xargs sed -i 's/201901/20191/g'

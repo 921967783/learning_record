@@ -1,0 +1,50 @@
+如果用云服务器的话定期做快照应该就没什么问题
+
+但如果是自己的主机安装的linux镜像那该有自己的备份策略：
+http://www.alewolf.com/article/backup_for_linux.html
+方法1：
+1、在保存备份文件的目录 xxx 下建立一个文件 backup.sh，其内容是：
+tar -zcf bin.tar.gz /bin
+tar -zcf boot.tar.gz /boot
+tar -zcf dev.tar.gz /dev
+tar -zcf etc.tar.gz /etc
+tar -zcf lib32.tar.gz /lib32
+tar -zcf lib64.tar.gz /lib64
+tar -zcf lib.tar.gz /lib
+tar -zcf opt.tar.gz /opt
+tar -zcf sbin.tar.gz /sbin
+tar -zcf selinux.tar.gz /selinux
+tar -zcf srv.tar.gz /srv
+tar -zcf var.tar.gz /var
+tar -zcf usr.tar.gz /usr
+
+2、在需要备份的时候进入到保存备份内容的目录执行一次命令： sh backup.sh
+
+3、在保存备份文件的目录 xxx 下建立一个叫 restore.sh 的文件，其内容如下：
+tar -zxf /mnt/xxx/bin.tar.gz
+
+tar -zxf /mnt/xxx/boot.tar.gz
+tar -zxf /mnt/xxx/dev.tar.gz
+tar -zxf /mnt/xxx/etc.tar.gz
+tar -zxf /mnt/xxx/lib32.tar.gz
+tar -zxf /mnt/xxx/lib64.tar.gz
+tar -zxf /mnt/xxx/lib.tar.gz
+tar -zxf /mnt/xxx/opt.tar.gz
+tar -zxf /mnt/xxx/sbin.tar.gz
+tar -zxf /mnt/xxx/selinux.tar.gz
+tar -zxf /mnt/xxx/srv.tar.gz
+tar -zxf /mnt/xxx/var.tar.gz
+tar -zxf /mnt/xxx/usr.tar.gz
+
+4、如果需要系统恢复，我就用光盘启动，mount 原来的根目录为 yyy，接着 mount 保存备份文件的目录为 xxx，接着进入到 /mnt/yyy，并在此下达命令： sh /mnt/xxx/restore.sh说明：
+（1）、备份和恢复需要1个多小时，这个时间根据你电脑的CPU速度和硬盘转速会有所不同。
+
+（2）、上面备份与恢复没有顾及 /home 目录和 /root 目录，因为我的系统主要是给学生做练习用的，那两个目录的内容没有意义。
+
+在实际工作中，可能这两个目录才是最重要的，你可以模仿着别的目录添加到 backup.sh 和 restore.sh 文件中去，甚至别的目录都不备份（以便节约备份时间）就备份这两个目录。
+
+
+
+方法2;
+做成iso镜像
+https://www.landui.com/help/show-8581.html

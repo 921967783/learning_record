@@ -8,7 +8,7 @@ group_id="com.nbcb"
 artifact_id="Jijin"
 package="tar.gz"
 version=""
-artifact_descrition="部署_UAT_JJDX"
+artifact_descrition="部署__JJDX"
 
 
 timestamps{
@@ -22,25 +22,25 @@ node ('105.203_win2008'){
 	}
 }
 
-echo '执行_下载_uat_JJDX'
+echo '执行_下载__JJDX'
 node ('master'){
 	nodeName = 'master';
-	stage('下载_uat_JJDX'){
+	stage('下载__JJDX'){
 		def packaging = "zip"
 		def artifact_id = "Jijin"
-		echo "下载uat_JJDX"
-		version = readFile("/.{artifact_id}_uat_time.txt").trim()
-		sh "if [-e ${artifact_id}-uat-${version}.${packaging} ];then rm -f ${artifact_id}-uat-${version}.${packaging};fi &&........"
-		stash includes: "${artifact_id}-uat-${version}.${packaging}", name: "artifact_Jijin_file"
+		echo "下载_JJDX"
+		version = readFile("/.{artifact_id}__time.txt").trim()
+		sh "if [-e ${artifact_id}--${version}.${packaging} ];then rm -f ${artifact_id}--${version}.${packaging};fi &&........"
+		stash includes: "${artifact_id}--${version}.${packaging}", name: "artifact_Jijin_file"
 	}
 }
 
-echo "执行部署_uat_JJDX(196197)"
-nodes = ["JJDX_113.196","JJDX_113.197"];
+echo "执行部署__JJDX()"
+nodes = ["",""];
 for (nodeVar in nodes){
 	node (nodeVar) {
 		nodeName = nodeVar;
-		stage('执行部署_uat_JJDX(196197)'){
+		stage('执行部署__JJDX()'){
 			def packaging = "zip"
 			sh "is_exist_dir = \$(ls |wc -l) && if [ \${is_exist_dir} -ne 0 ]; then rm -rf *;fi"
 			unstash 'artifact_Jijin_file'
@@ -62,7 +62,7 @@ for (nodeVar in nodes){
 				sh "JENKINS_NODE_COOKIE=donKillMe nohup ./stopServer.sh server1 > console.log1 &"
 				sh "JENKINS_NODE_COOKIE=donKillMe nohup ./stopServer.sh server1 > console.log1 &"
 				echo "启动服务OK"
-				sh "curl -d \"filelist = `find /home/hsfss30/app -mtime -1|xargs|sed 's/ /,/g'`&groupID=${group_id}&artID=${artifact_id}-uat&version=${version}&nodecode=${NODE_NAME}\" http://12.99.110.36/receiveResult.action "
+				sh "curl -d \"filelist = `find /home/hsfss30/app -mtime -1|xargs|sed 's/ /,/g'`&groupID=${group_id}&artID=${artifact_id}-&version=${version}&nodecode=${NODE_NAME}\" http://12.99.110.36/receiveResult.action "
 			}
 			
 			if (nodeName == "JJDX_113.196"){

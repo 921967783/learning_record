@@ -1,0 +1,44 @@
+jenkinsfile:
+
+timestamps{
+node ('master'){
+	nodeName="master";
+	stage ('test_docker'){
+		//sh 'docker images'
+		//sh 'docker ps -a'
+		sh "if [ `docker ps -a|grep tomcat8101copy|grep -v grep|wc -l` == '1' ];then docker rm -f tomcat8101copy ;fi"
+		sh "if [ `docker images|grep testdockerfile|grep -v grep|wc -l` == '1' ];then docker rmi -f testdockerfile ;fi"
+		//sh "docker build -t testdockerfile -f /usr/local/docker/tomcat8101 ."
+		sh "docker build -t testdockerfile  /usr/local/docker/tomcat8101"
+		//sh "docker run -dit --name tomcat8101copy -p 8101:8101 -v /home/docker_workspace/tomcat8101/:/usr/local/tomcat-list/tomcat8101/ testdockerfile /bin/bash "
+	    sh "docker run -dit --name tomcat8101copy -p 8101:8101 -v /home/docker_workspace/tomcat8101/:/usr/local/tomcat-list/tomcat8101/testmount/ testdockerfile /bin/bash "
+
+	}
+	}
+}
+
+
+
+
+Dockerfile:
+
+FROM 47.106.103.166:5000/centos_tomcat:v1
+
+#如果容器本身没有java环境则添加
+#add /usr/local/src/jdk1.8.tar.gz /usr/local
+#WORKDIR /home/docker_workspace/tomcat8101
+COPY 1.txt /usr/local/tomcat-list/tomcat8101/webapps/ROOT/
+
+#配置环境变量，不能用export，dockerfile的一行执行完就会被回收
+ENV JAVA_HOME /usr/java/jdk1.8.0_181
+ENV JRE_HOME /usr/java/jdk1.8.0_181/jre
+ENV CLASSPATH .:$JAVA_HOME/jre/lib:$JAVA_HOME/lib
+ENV PATH $PATH:$JAVA_HOME/bin
+
+
+#RUN /usr/local/tomcat-list/tomcat8101/bin/startup.sh
+#暴露的端口
+EXPOSE 8101
+
+#启动容器时容器内执行的命令
+ENTRYPOINT /usr/local/tomcat-list/tomcat8101/bin/catalina.sh run

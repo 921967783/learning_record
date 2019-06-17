@@ -1,0 +1,68 @@
+哨兵模式原理和配置：https://blog.csdn.net/u012240455/article/details/81843714
+
+
+一.安装redis
+1.官网下载redis包
+make && make install PREFIX=/usr/local/redis      （编译可能出错，问题不大）
+编译完后可以把rdis命令的路径放在PATH里方便调用
+2.集群或主从的准备工作
+copy redis.conf 到目录下，拷贝多份
+
+主从的配置：
+# vim /opt/redis/6379/6379.conf 
+# Redis使用后台模式
+daemonize yes
+# 关闭保护模式
+protected-mode no
+# 注释以下内容开启远程访问
+# bind 127.0.0.1
+# 修改启动端口为6379
+port 6379
+# 修改pidfile指向路径
+pidfile /opt/redis/6379/redis_6379.pid
+# 修改日志输出路径 logfile "/opt/redis/6379/redis.log"
+# masterauth 123456   redis如果有密码认证就加上这两个
+# requirepass 123456
+以此类推,修改端口6380及6381配置。
+
+分别启动
+redis-server /opt/redis/6379/redis.conf
+redis-server /opt/redis/6380/redis.conf
+redis-server /opt/redis/6381/redis.conf
+
+3.连接主从
+有两种方式，一种就是在配置里写好
+# slaveof 192.168.10.124 6379
+但哨兵模式下，如果这个节点被选为master的话该行会被删除。
+
+还有一种就是启动后配置（这种重启后会失效但我觉得更灵活）
+连接6380端口的redis
+redis-cli -h 192.168.10.124 -p 6380
+127.0.0.1:7000> slaveof 192.168.10.122 7002
+这样就加入了
+
+查看状态
+127.0.0.1:7001> info replication
+
+取消主从
+127.0.0.1:7000> SLAVEOF NO ONE
+
+4。设置哨兵模式
+
+哨兵模式要注意挺多事情的
+单个的sentinel可以这样设置，但一般也不会设置单个的（测试就先这样）
+vi sentinel.conf
+
+port 26000
+pidfile "/usr/local/redis/master-slave/7000/redis-sentinel.pid"
+dir "/usr/local/redis/master-slave/7000"
+daemonize yes
+protected-mode no
+logfile "/usr/local/redis/master-slave/7000/redis-sentinel.log"
+
+sentinel monitor redisMaster 192.168.10.122 7002 1
+sentinel down-after-milliseconds redisMaster 10000
+sentinel failover-timeout redisMaster 60000
+
+哨兵模式启动之后，从点新加入，主节点变更都会被记录在sentinel.conf，所以之后要彻底改变主从结构要把这个配置初始化。
+

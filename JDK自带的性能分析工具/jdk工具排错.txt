@@ -1,0 +1,14 @@
+https://blog.csdn.net/lmy4710/article/details/40114867
+
+
+
+1.jinfo，查看jvm配置信息
+jinfo pid
+
+2.jstack，查看jvm线程运行状态，是否有死锁现象等等信息
+jstack pid
+
+3.jstat，可以查看很多内容 :idea: 
+jstat -gcutil  -h 20 pid  1000 100 → 查看Java进程GC的情况，1000ms统计一次gc情况统计100次
+
+jstat具体使用方法：https://www.cnblogs.com/lizhonghua34/p/7307139.html

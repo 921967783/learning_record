@@ -1,0 +1,6 @@
+cat -n 会把行前标序号
+cat 1.txt 2.txt >3.txt
+
+对于cat来说，执行效果是一样的，但是实现原理却完全不一样
+cat a.txt : cat 程序读a.txt文件，并把它显示出来,cat获取到的是一个a.txt文件名
+cat < a.txt : cat程序 显示 a.txt文件的内容 ，cat程序获取的不是文件名，而是a.txt的内容

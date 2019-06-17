@@ -1,0 +1,18 @@
+location 先匹配普通，再匹配正则
+
+什么是正则：
+“~” for case sensitive matching  区分大小写
+“~*” for case insensitive matching  不区分大小写
+除了这两种置为都是普通
+
+普通之间的匹配也有规则：按照最大前缀匹配的原则（排除严格精确匹配和 =精确匹配 和 ^~最大前缀匹配）
+匹配优先级
+（location =） > (location 完整路径) > (location ^~路径) > (location ~或者 ~*正则编辑顺序) > (location 部分起始路径) >(location /) 
+
+
+“普通location ”与“正则location ”之间的规则是：选择出“普通location ”的最大前缀匹配结果后，还需要继续搜索正则location 
+
+
+正则与正则之间的规则：匹配到一条就不继续匹配了
+
+location 的精确匹配 = 要真的完全一致才会进入规则。

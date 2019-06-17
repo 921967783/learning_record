@@ -1,0 +1,54 @@
+./configure --prefix=/usr/local/httpd --enable-mods-shared=all --enable-so 
+加载所有模块
+
+https://blog.csdn.net/yiluoak_47/article/details/22067185
+
+
+然后安装php两个都源码编译
+
+./configure --prefix=/home/php \
+--with-config-file-path=/home/php/etc \
+--with-mysql=mysqlnd \
+--with-mysqli=mysqlnd \
+--with-pdo-mysql=mysqlnd \
+--enable-inline-optimization \
+--enable-gd-native-ttf \
+--enable-sockets \
+--enable-zip \
+--enable-calendar \
+--enable-intl \
+--enable-soap \
+--enable-xml \
+--enable-ftp \
+--enable-shmop \
+--enable-sysvsem \
+--enable-mbstring \
+--enable-exif \
+--enable-opcache \
+--with-gettext \
+--with-zlib \
+--with-bz2 \
+--with-iconv-dir=/usr/local/libiconv \
+--with-gd \
+--with-xmlrpc \
+--with-curl \
+--with-mhash \
+--with-mcrypt \
+--with-openssl \
+--with-jpeg-dir \
+--with-png-dir \
+--with-freetype-dir \
+--with-libxml-dir \
+--disable-ipv6 \
+--disable-debug \
+--disable-rpath \
+--with-apxs2=/home/apache2.4/bin/apxs \
+--enable-bcmath
+
+
+
+
+
+
+apache增加对php模块的支持配置：！！！！！
+https://www.cnblogs.com/qiuxiao/p/6815350.html

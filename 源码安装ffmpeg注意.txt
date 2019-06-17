@@ -1,0 +1,3 @@
+./configure --enable-version3 --enable-libvpx --enable-libfdk-aac --enable-libmp3lame --enable-libvorbis --enable-libx264 --enable-libxvid --enable-shared --enable-gpl --enable-postproc --enable-nonfree --enable-avfilter --enable-pthreads
+
+export PKG_CONFIG_PATH=/usr/lib/pkgconfig/:/usr/local/lib/pkgconfig/
